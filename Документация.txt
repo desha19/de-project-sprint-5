@@ -1,0 +1,58 @@
+---[Проектная работа по DWH для нескольких источников.]---
+
+В проекте реализована витрина для расчётов с курьерами. В ней рассчитаны суммы оплаты каждому курьеру за предыдущий месяц.
+
+Витрина содержится в слое CDM: 
+	dm_courier_ledger {id, 
+		   	   courier_id, 
+		   	   courier_name, 
+		   	   settlement_year, 
+		   	   settlement_month, 
+		   	   orders_count, 
+		   	   orders_total_sum, 
+		   	   rate_avg, 
+		   	   order_processing_fee, 
+		   	   courier_order_sum, 
+		   	   courier_tips_sum, 
+		   	   courier_reward_sum} 
+
+Код выполнения DAG находится в директории: dm_courier_ledger_dag
+
+Слой DDS реализован в виде снежинки и содержит следующие таблицы: dm_couriers, 
+								 dm_deliveries, 
+								 dm_orders, 
+								 dm_products, 
+								 dm_restaurants, 
+								 dm_timestamps, 
+								 dm_users, 
+								 fct_product_sales, 
+								 srv_wf_settings.
+
+Наполнением данных выполняет код, который находится в директориях: dm_couriers_dag, 
+								    dm_couriers_dag, 
+								    dm_deliveries_dag. 
+
+Слой STG содержит данные в том виде, в котором находятся в источнике и содержит таблицы: api_couriers, 
+										      api_deliveries, 
+										      api_restaurants, 
+										      bonussystem_events, 
+										      bonussystem_ranks, 
+										      bonussystem_users,
+										      ordersystem_orders, 
+										      ordersystem_restaurants,
+										      ordersystem_users, 
+										      srv_wf_settings.
+Выгрузка из источников реализована при помощи кода содержащийся в файле api_dag.py. В нём реализована выгрузка данных из источника данных, а именно ""https://d5d04q7d963eapoepsqr.apigw.yandexcloud.net/...",
+где "...": restaurants, couriers, deliveries. 
+
+Реализованные функции:
+- Функция "load_data_from_api" выполняет подстановку параметров, при помощи которых будет выполняться обращение к API.
+- Функция "extract_restaurant_data" выполняет выгрузку данных о ресторанах с сохранением их в XCOM, для того, что бы в дальнейшем эти данные при помощи функции "insert_data_to_postgres" выполнить загрузку в БД de.
+- Функция "extract_courier_data" выполняет выгрузку данных о курьерах с сохранением их в XCOM для того, что бы в дальнейшем эти данные при помощи функции "insert_data_to_postgres" выполнить загрузку в БД de.
+- Функция "extract_delivery_data" выполняет выгрузку данных о доставках с сохранением их в XCOM для того, что бы в дальнейшем эти данные при помощи функции "insert_data_to_postgres" выполнить загрузку в БД de.
+- Функция "insert_data_to_postgres" выполняет загрузку (INSERT) данных в БД de в таблицы по названию: api_couriers, api_deliveries, api_restaurants. В этой функции есть вложенная функция "check_id_exists", 
+  которая выполняет проверку данных (если данный идентификатор присутствует в таблице, то эту строчку пропускаем).
+
+Реализация DAG:
+Запуск тасков выполняется в последовательности: [extract_restaurant_data_task, extract_courier_data_task, extract_delivery_data_task] >> insert_data_to_postgres_task
+

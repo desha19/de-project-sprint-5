@@ -1,0 +1,6 @@
+CREATE TABLE stg.ordersystem_couriers (
+	id serial NOT NULL,
+	couriers_id varchar NOT NULL,
+	object_value text NOT NULL,
+	CONSTRAINT ordersystem_couriers_pk PRIMARY KEY (id)
+);

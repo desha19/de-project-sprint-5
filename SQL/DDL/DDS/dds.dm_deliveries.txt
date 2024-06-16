@@ -1,0 +1,14 @@
+CREATE TABLE dds.dm_deliveries (
+	id serial NOT NULL,
+	delivery_id varchar NOT NULL,
+	order_id int NOT NULL,
+	courier_id int NOT NULL,
+	delivery_address varchar NOT NULL,
+	delivery_ts timestamp NOT NULL,
+	delivery_rate numeric(2, 1) NOT NULL,
+	delivery_sum numeric(10, 2) NOT NULL,
+	tip_sum numeric(10, 2) NOT NULL,
+	CONSTRAINT dm_deliveries_pk PRIMARY KEY (id),
+	CONSTRAINT dm_deliveries_fk FOREIGN KEY (id) REFERENCES dds.dm_orders(id),
+	CONSTRAINT dm_deliveries_fk_1 FOREIGN KEY (id) REFERENCES dds.dm_couriers(id)
+);

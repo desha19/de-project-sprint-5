@@ -1,0 +1,1 @@
+ALTER TABLE dds.dm_orders ADD courier_id int NOT NULL;

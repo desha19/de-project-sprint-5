@@ -1,0 +1,6 @@
+CREATE TABLE dds.dm_couriers (
+	id serial NOT NULL,
+	courier_id varchar NOT NULL,
+	courier_name varchar NOT NULL,
+	CONSTRAINT dm_couriers_pk PRIMARY KEY (id)
+);
