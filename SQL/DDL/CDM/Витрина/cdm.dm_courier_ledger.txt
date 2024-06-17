@@ -37,3 +37,6 @@ COMMENT ON COLUMN cdm.dm_courier_ledger.order_processing_fee IS 'Сумма, у�
 COMMENT ON COLUMN cdm.dm_courier_ledger.courier_order_sum IS 'Сумма, которую необходимо перечислить курьеру за доставленные им/ей заказы. За каждый доставленный заказ курьер должен получить некоторую сумму в зависимости от рейтинга';
 COMMENT ON COLUMN cdm.dm_courier_ledger.courier_tips_sum IS 'Сумма, которую пользователи оставили курьеру в качестве чаевых';
 COMMENT ON COLUMN cdm.dm_courier_ledger.courier_reward_sum IS 'Сумма, которую необходимо перечислить курьеру. Вычисляется как courier_order_sum + courier_tips_sum * 0.95 (5% — комиссия за обработку платежа)';
+
+ALTER TABLE cdm.dm_courier_ledger
+ADD CONSTRAINT dm_courier_ledger_courier_month_year_check_unique UNIQUE(courier_id, settlement_year, settlement_month);

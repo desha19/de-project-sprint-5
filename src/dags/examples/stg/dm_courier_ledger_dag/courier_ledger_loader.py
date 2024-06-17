@@ -34,15 +34,15 @@ class DmCourierLedgerOriginRepository:
             cur.execute(
                 """
 with events as (
-select json_array_elements((event_value::json->>'product_payments')::json)->>'product_id' as product_id,
-	   event_value::json->>'order_id' as order_id,
-	   (json_array_elements((event_value::json->>'product_payments')::json)->>'quantity')::numeric(19, 5) as "count",
-	   (json_array_elements((event_value::json->>'product_payments')::json)->>'price')::numeric(19, 5) as price
-from stg.bonussystem_events
+select product_id,
+	   order_id,
+	   "count",
+	    price
+from dds.fct_product_sales_cur fpsc 
 ),
 orders as (
-select dds.dm_orders.id,
-       order_key
+select dds.dm_orders.id--,
+       --order_key
 from dds.dm_orders
 ),
 dm_products as (
@@ -58,8 +58,8 @@ select p.id as product_id,
 	   e.price, 
        e.price * e."count" as total_sum
 from events e
-JOIN orders o on o.order_key = e.order_id
-JOIN dm_products p on p.product_id = e.product_id
+join orders o on o.id = e.order_id
+join dm_products p on p.id = e.product_id
 ),
 courier_ledger_1 as (
 select do1.courier_id as courier_id,
@@ -97,7 +97,7 @@ left join dds.dm_couriers dc on do1.courier_id = dc.id
 left join dds.dm_timestamps dt on do1.timestamp_id = dt.id
 left join dds.dm_deliveries dd on do1.id = dd.order_id
 left join product_sales ps on do1.id = ps.order_id
-where do1.order_status = 'CLOSED' and dt."month" = extract(month from (now()at time zone 'utc')::date) - 1 --За предыдущий месяц
+where do1.order_status = 'CLOSED' and dt."month" = extract(month from (now()at time zone 'utc')::date) - 1 
 group by do1.courier_id, 
     	 dc.courier_name, 
          dt."year",
@@ -132,7 +132,6 @@ select *
 from courier_ledger_2
                     WHERE id > %(threshold)s --Пропускаем те объекты, которые уже загрузили.
                     ORDER BY id ASC --Обязательна сортировка по id, т.к. id используем в качестве курсора.
-                    LIMIT %(limit)s; --Обрабатываем только одну пачку объектов.
                 """, {
                     "threshold": dm_courier_ledger_threshold,
                     "limit": limit

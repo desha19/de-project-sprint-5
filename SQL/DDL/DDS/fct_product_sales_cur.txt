@@ -1,0 +1,15 @@
+CREATE TABLE dds.fct_product_sales_cur (
+	id serial NOT NULL,
+	product_id int4 NOT NULL,
+	order_id int4 NOT NULL,
+	count int4 NOT NULL,
+	price numeric(19, 5) NOT NULL,
+	total_sum numeric(19, 5) NOT NULL,
+	CONSTRAINT fct_product_sales_cur_pk PRIMARY KEY (id),
+	CONSTRAINT fct_product_sales_cur_count_check CHECK ((count >= 0)),
+	CONSTRAINT fct_product_sales_cur_price_check CHECK ((price >= (0)::numeric)),
+	CONSTRAINT fct_product_sales_cur_total_sum_check CHECK ((total_sum >= (0)::numeric)),
+	CONSTRAINT fct_product_sales_cur_fk FOREIGN KEY (order_id) REFERENCES dds.dm_orders(id),
+	CONSTRAINT fct_product_sales_cur_fk_1 FOREIGN KEY (product_id) REFERENCES dds.dm_products(id)
+);
+CREATE UNIQUE INDEX fct_product_sales_cur_id_idx ON dds.fct_product_sales_cur (id);
